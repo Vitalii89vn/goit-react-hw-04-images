@@ -1,37 +1,23 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { GoSearch } from 'react-icons/go';
 import css from './Searchbar.module.css'
 import PropTypes from 'prop-types';
 
-export class SearchBar extends Component {
-
-    state = {
-        searchQuery: '',
+export const SearchBar =({onSubmit}) => {
+const [searchQuery, setSearchQuery] = useState('')
+   
+   const handleSearch = e => {
+        setSearchQuery(e.currentTarget.value.toLowerCase() )
     };
 
-    static propTypes = {
-        onSubmit: PropTypes.func.isRequired,
-      };
-
-    handleSearch = e => {
-        this.setState({ searchQuery: e.currentTarget.value.toLowerCase() })
-    };
-
-    handleSubmit = e => {
-        const { searchQuery } = this.state;
-    
+    const handleSubmit = e => {
         e.preventDefault();
         if (searchQuery.trim() === '') {
             return;
         };
-        this.props.onSubmit(searchQuery);
-        this.setState({ searchQuery: ''})
+        onSubmit(searchQuery);
+        setSearchQuery('')
     };
-
-    render() {
-        const { handleSearch, handleSubmit } = this;
-        const { searchQuery } = this.state;
-        
         return (
             <header className={css.Searchbar}>
                 <form className={css.SearchForm} onSubmit={handleSubmit}>
@@ -51,5 +37,7 @@ export class SearchBar extends Component {
                 </form>
             </header>
         )
-    }
+};
+SearchBar.propTypes = {
+    onSubmit: PropTypes.func.isRequired,
 };

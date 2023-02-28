@@ -5,25 +5,21 @@ import PropTypes from 'prop-types';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export const Modal = ({showModal, children}) => {
- 
-  // componentDidMount() {
-  //   window.addEventListener('keydown', this.handleKeyDown)
-  // };
-  // componentWillUnmount() {
-  //   window.removeEventListener('keydown', this.handleKeyDown);
-  // };  
-  const handleKeyDown = e => {
-    if (e.code === "Escape") {
-      showModal()}
-  };
-  useEffect(() => { window.addEventListener('keydown', handleKeyDown) }, [handleKeyDown]);
-  useEffect(() => { window.removeEventListener('keydown', handleKeyDown)}, [handleKeyDown])
+export const Modal = ({ isShowModal, children }) => {
 
-
-  const handleBackdropClick = e => {
+  useEffect(()=>{
+    function handleKeyDown(e) {
+      if (e.code === "Escape") {
+        isShowModal()
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown) };
+     },[isShowModal]
+  )
+ const handleBackdropClick = e => {
     if (e.currentTarget === e.target) {
-      showModal();
+      isShowModal();
     }
   };
 
@@ -38,5 +34,5 @@ export const Modal = ({showModal, children}) => {
 }
 
 Modal.propTypes = {
-    showModal: PropTypes.func.isRequired,
+    isShowModal: PropTypes.func.isRequired,
   };
