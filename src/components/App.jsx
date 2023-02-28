@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import { SearchBar } from "./Searchbar/Searchbar";
 import { ImageGallery} from "components/ImageGallery/ImageGallery";
 import Notiflix from 'notiflix';
@@ -6,55 +6,43 @@ import { FetchPixabay } from "utils/FetchPixabay";
 import { Loader } from "components/Loader/Loader";
 import { Button } from "components/Button/Button";
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    page: 1,
-    images: {},
-    error: null,
-    card: [],
-    loading: false,
-  };
+export const App =()=> {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState({});
+  const [error, setError] = useState(null);
+  const [card, setCard] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-   
-        const prevQuery = prevState.searchQuery;
-        const nextQuery = this.state.searchQuery;
-        const prevpage = prevState.page;
-        const nextpage = this.state.page;
-       
-    if (prevQuery !== nextQuery) { this.setState({ card: [], images: {} }) };
-        
-        if (prevQuery !== nextQuery || prevpage !== nextpage) {
-          this.setState({loading: true })
   
-           FetchPixabay(nextQuery, nextpage)
-            .then(images => {
-              if (images.total !== 0) {
-                this.setState(prevState => ({
-                  card: [...prevState.card, ...images.hits],
-                  images,
-                }));
-              }
+  useEffect(() => {
+    if (searchQuery === '') return;
+
+    setLoading(true);
+
+    FetchPixabay(searchQuery, page, error)
+      .then(images => {
+        if (images.total !== 0) {
+          setImages(images);
+          setCard(prevState => [...prevState, ...images.hits]);
+             }
               else {
                 Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
               };
             })
-            .catch(error => this.setState({ error }))
-            .finally(() => this.setState({ loading: false }))       
-          }
+            .catch(()=> setError(error))
+            .finally(()=>setLoading(false)) 
+  },[error, page, searchQuery])
+
+ function handleFormSubmit(searchQuery) {
+   setSearchQuery(searchQuery);
+   setCard([]);
+   setImages({});
+   setPage(1);
   };
-  handleFormSubmit = searchQuery => {
-    this.setState({ searchQuery, page: 1 })
-  };
-  onClickLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1
-    }))
-  };
-  render() {
-    const { page, images, card, loading, error} = this.state;
-    const { handleFormSubmit, onClickLoadMore} = this;
+
+  const onClickLoadMore = () => {setPage(prevPage=> prevPage + 1)};
+
     return (
       <div>
         <SearchBar onSubmit={handleFormSubmit} />
@@ -64,6 +52,6 @@ export class App extends Component {
         { images.total === 0 && error.message }
       </div>
     )
-  }
-}
   
+}
+ 
